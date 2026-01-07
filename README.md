@@ -1,2 +1,2 @@
 # Ant-sim
-Langton's ant simulator with customisation
+Langton's ant simulator with planned customisation
