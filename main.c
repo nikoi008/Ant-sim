@@ -45,10 +45,10 @@ const char *rule_pointers[] = { rules[0], rules[1], rules[2], rules[3] };
 
 void InitColourStruct() {
     for (int i = 0; i < 20; i++) {
-        Colours[i].r = rand() % 255;
-        Colours[i].g = rand() % 255;
-        Colours[i].b = rand() % 255;
-        Colours[i].colourRule = rand() % 4;
+        //Colours[i].r = rand() % 255;
+        //Colours[i].g = rand() % 255;
+        //Colours[i].b = rand() % 255;
+      //  Colours[i].colourRule = rand() % 4;
         char bufferR[8];
         char bufferG[8];
         char bufferB[8];
@@ -63,11 +63,11 @@ void InitColourStruct() {
 }
 void InitAntStruct(){
     for(int i = 0; i < 8; i++){
-        ants[i].antX = rand() % 200;
-        ants[i].antY = rand() % 200;
-        ants[i].antDir = rand() % 4;
+//        ants[i].antX = rand() % 200;
+  //      ants[i].antY = rand() % 200;
+   //     ants[i].antDir = rand() % 4;
         char bufferX[8];
-        char bufferY[8];
+       char bufferY[8];
         snprintf(ants[i].cAntX,sizeof(ants[i].cAntX),"%d",ants[i].antX);
         snprintf(ants[i].cAntY,sizeof(ants[i].cAntY),"%d",ants[i].antY);
     }
