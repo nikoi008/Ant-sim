@@ -5,6 +5,7 @@
 #define RAYLIB_NUKLEAR_IMPLEMENTATION
 #define RAYLIB_NUKLEAR_INCLUDE_DEFAULT_FONT
 #include "raylib-nuklear.h"
+#include <string.h>
 #include <stdbool.h>
 
 typedef enum { UP, RIGHT, DOWN, LEFT } Direction;
@@ -42,34 +43,47 @@ char dirs[4][7] = {"UP", "RIGHT", "DOWN", "LEFT"};
 const char *dir_pointers[] = { dirs[0], dirs[1], dirs[2], dirs[3] };
 char rules[4][4] = {"R", "L", "U", "C"};
 const char *rule_pointers[] = { rules[0], rules[1], rules[2], rules[3] };
+void syncColourBuffer(int i){
+    snprintf(Colours[i].cr, 8, "%d", Colours[i].r);
+    snprintf(Colours[i].cg, 8, "%d", Colours[i].g);
+    snprintf(Colours[i].cb, 8, "%d", Colours[i].b);
 
+    colourlen[i][0] = strlen(Colours[i].cr);
+    colourlen[i][1] = strlen(Colours[i].cg);
+    colourlen[i][2] = strlen(Colours[i].cb);
+}
+void syncAntBuffer(int i){
+        char bufferX[8];
+        char bufferY[8];
+        snprintf(ants[i].cAntX,8,"%d",ants[i].antX);
+        snprintf(ants[i].cAntY,8,"%d",ants[i].antY);
+        antlen[i][0] = strlen(ants[i].cAntX);
+        antlen[i][1] = strlen(ants[i].cAntY);
+}
 void InitColourStruct() {
     for (int i = 0; i < 20; i++) {
-        //Colours[i].r = rand() % 255;
-        //Colours[i].g = rand() % 255;
-        //Colours[i].b = rand() % 255;
-      //  Colours[i].colourRule = rand() % 4;
-        char bufferR[8];
-        char bufferG[8];
-        char bufferB[8];
-        snprintf(Colours[i].cr, sizeof Colours[i].cr, "%d", Colours[i].r);
-        snprintf(Colours[i].cg, sizeof Colours[i].cg, "%d", Colours[i].g);
-        snprintf(Colours[i].cb, sizeof Colours[i].cb, "%d", Colours[i].b);
-
+        Colours[i].r = rand() % 255;
+        Colours[i].g = rand() % 255;
+        Colours[i].b = rand() % 255;
+        selected_rules[i] = rand() % 4;
         for (int j = 0; j < 3; j++) {
             colourlen[i][j] = 0;
         }
+        syncColourBuffer(i);
+
+
+
     }
 }
+
 void InitAntStruct(){
     for(int i = 0; i < 8; i++){
-//        ants[i].antX = rand() % 200;
-  //      ants[i].antY = rand() % 200;
-   //     ants[i].antDir = rand() % 4;
-        char bufferX[8];
-       char bufferY[8];
-        snprintf(ants[i].cAntX,sizeof(ants[i].cAntX),"%d",ants[i].antX);
-        snprintf(ants[i].cAntY,sizeof(ants[i].cAntY),"%d",ants[i].antY);
+        ants[i].antX = rand() % 200;
+        ants[i].antY = rand() % 200;
+        selected_dirs[i] = rand() % 4;
+        syncAntBuffer(i);
+
+
     }
 }
 bool RunLauncherFrame(struct nk_context *ctx) {
@@ -120,29 +134,19 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             if(ants[i].antY >= 200) ants[i].antY = 199;
             if(ants[i].antY < 0) ants[i].antY = 0;
             nk_combobox(ctx, dir_pointers, 4, &selected_dirs[i], 25, nk_vec2(nk_widget_width(ctx), 200));
+            ants[i].antX =xt // todo finsih 
         }
 
-        float widths[] = {15, 60, 15, 60, 15, 60, 50, 100, 200};
+
+        float widths[] = {130, 130, 130, 130, 80, 130}; 
+
         for (int i = 0; i < colourCount; i++) {
-            Colours[i].r = atoi(Colours[i].cr);
-            if (Colours[i].r > 255) Colours[i].r = 255;
-            if (Colours[i].r < 0)   Colours[i].r = 0;
+            nk_layout_row(ctx, NK_STATIC, 30, 6, widths);
 
-            Colours[i].g = atoi(Colours[i].cg);
-            if (Colours[i].g > 255) Colours[i].g = 255;
-            if (Colours[i].g < 0)   Colours[i].g = 0;
+            Colours[i].r = nk_propertyi(ctx, "#R", 0, Colours[i].r, 255, 1, 1);
+            Colours[i].g = nk_propertyi(ctx, "#G", 0, Colours[i].g, 255, 1, 1);
+            Colours[i].b = nk_propertyi(ctx, "#B", 0, Colours[i].b, 255, 1, 1);
 
-            Colours[i].b = atoi(Colours[i].cb);
-            if (Colours[i].b > 255) Colours[i].b = 255;
-            if (Colours[i].b < 0)   Colours[i].b = 0;
-
-            nk_layout_row(ctx, NK_STATIC, 30, 9, widths);
-            nk_label(ctx, "R", NK_TEXT_CENTERED);
-            nk_edit_string(ctx, NK_EDIT_SIMPLE, Colours[i].cr, &colourlen[i][0], 4, nk_filter_decimal);
-            nk_label(ctx, "G", NK_TEXT_CENTERED);
-            nk_edit_string(ctx, NK_EDIT_SIMPLE, Colours[i].cg, &colourlen[i][1], 4, nk_filter_decimal);
-            nk_label(ctx, "B", NK_TEXT_CENTERED);
-            nk_edit_string(ctx, NK_EDIT_SIMPLE, Colours[i].cb, &colourlen[i][2], 4, nk_filter_decimal);
             nk_label(ctx, "RULE", NK_TEXT_CENTERED);
             nk_combobox(ctx, rule_pointers, 4, &selected_rules[i], 25, nk_vec2(nk_widget_width(ctx), 200));
             nk_button_color(ctx, nk_rgb(Colours[i].r, Colours[i].g, Colours[i].b));
@@ -173,20 +177,20 @@ void runSimFrame(RenderTexture2D canvas) {
         Rule currentRule = Colours[currentIndex].colourRule;
 
         switch (currentRule) {
-            case R: ants[i].antDir = (ants[i].antDir + 1) % 4; break;
+            case R: ants[i].antDir = (ants[i].antDir + 1) % 4; break; 
             case L: ants[i].antDir = (ants[i].antDir + 3) % 4; break;
             case U: ants[i].antDir = (ants[i].antDir + 2) % 4; break;
             case C: break;
         }
-
-
-        grid[y][x] = (currentIndex + 1) % colourCount;
         tileColour tile = Colours[grid[y][x]];
         DrawRectangle(x * 5, y * 5, 5, 5, (Color){tile.r, tile.g, tile.b, 255});
+        grid[y][x] = (currentIndex + 1) % colourCount; 
+        
+
 
         switch (ants[i].antDir) {
             case UP:    ants[i].antY--; break;
-            case RIGHT: ants[i].antX++; break;
+            case RIGHT: ants[i].antX++; break; 
             case DOWN:  ants[i].antY++; break;
             case LEFT:  ants[i].antX--; break;
         }
