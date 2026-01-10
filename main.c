@@ -70,13 +70,13 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             startGame = true;
         }
         if (nk_button_label(ctx, "ADD ANT")) {
-            antcount++;
+            antcount++; 
             if (antcount > 8) antcount = 8;
         }
         if (nk_button_label(ctx, "REMOVE ANT")) {
             antcount--;
             if (antcount < 1) antcount = 1;
-        }
+        }   
         if (nk_button_label(ctx, "ADD COLOUR")) {
             colourCount++;
             if (colourCount > 20) colourCount = 20;
@@ -85,6 +85,7 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             colourCount--;
             if (colourCount < 2) colourCount = 2;
         }
+        //if(nk_button_label(ctx,"ORIGINAL RULES"))
         //Add default, random, and maybe symmetry?
 
         nk_layout_row_dynamic(ctx, 30, 3);
@@ -100,8 +101,11 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             
             nk_label(ctx, bufferY, NK_TEXT_LEFT);
             nk_label(ctx, butterDir, NK_TEXT_LEFT);
-            ants[i].antX = nk_propertyi(ctx,"X",0,ants[i].antX,200,1,1);
-            ants[i].antY = nk_propertyi(ctx,"Y",0,ants[i].antY,200,1,1);
+            char x_id[32], y_id[32];
+            sprintf(x_id, "X%d", i);
+            sprintf(y_id, "Y%d", i);
+            ants[i].antX = nk_propertyi(ctx,x_id,0,ants[i].antX,199,1,1); //IMPORTANT TO SET FOR WEBSITE: ADD ID'S AND CHANGE MAX TO 199
+            ants[i].antY = nk_propertyi(ctx,y_id,0,ants[i].antY,199,1,1);
             nk_combobox(ctx, dir_pointers, 4, &selected_dirs[i], 25, nk_vec2(nk_widget_width(ctx), 200));
 
         }
