@@ -7,6 +7,9 @@
 #include "raylib-nuklear.h"
 #include <string.h>
 #include <stdbool.h>
+#if defined(PLATFORM_WEB)
+    #include <emscripten/emscripten.h>
+#endif
 
 typedef enum { UP, RIGHT, DOWN, LEFT } Direction;
 typedef enum { R, L, U, C } Rule;
