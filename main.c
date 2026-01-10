@@ -12,8 +12,6 @@ typedef enum { UP, RIGHT, DOWN, LEFT } Direction;
 typedef enum { R, L, U, C } Rule;
 
 typedef struct {
-    char cAntX[8];
-    char cAntY[8];
     int antX;
     int antY;
     Direction antDir;
@@ -24,9 +22,6 @@ typedef struct {
     int r;
     int g;
     int b;
-    char cr[8];
-    char cg[8];
-    char cb[8];
     Rule colourRule;
 } tileColour;
 
@@ -43,36 +38,13 @@ char dirs[4][7] = {"UP", "RIGHT", "DOWN", "LEFT"};
 const char *dir_pointers[] = { dirs[0], dirs[1], dirs[2], dirs[3] };
 char rules[4][4] = {"R", "L", "U", "C"};
 const char *rule_pointers[] = { rules[0], rules[1], rules[2], rules[3] };
-void syncColourBuffer(int i){
-    snprintf(Colours[i].cr, 8, "%d", Colours[i].r);
-    snprintf(Colours[i].cg, 8, "%d", Colours[i].g);
-    snprintf(Colours[i].cb, 8, "%d", Colours[i].b);
 
-    colourlen[i][0] = strlen(Colours[i].cr);
-    colourlen[i][1] = strlen(Colours[i].cg);
-    colourlen[i][2] = strlen(Colours[i].cb);
-}
-void syncAntBuffer(int i){
-        char bufferX[8];
-        char bufferY[8];
-        snprintf(ants[i].cAntX,8,"%d",ants[i].antX);
-        snprintf(ants[i].cAntY,8,"%d",ants[i].antY);
-        antlen[i][0] = strlen(ants[i].cAntX);
-        antlen[i][1] = strlen(ants[i].cAntY);
-}
 void InitColourStruct() {
     for (int i = 0; i < 20; i++) {
         Colours[i].r = rand() % 255;
         Colours[i].g = rand() % 255;
         Colours[i].b = rand() % 255;
         selected_rules[i] = rand() % 4;
-        for (int j = 0; j < 3; j++) {
-            colourlen[i][j] = 0;
-        }
-        syncColourBuffer(i);
-
-
-
     }
 }
 
@@ -81,7 +53,6 @@ void InitAntStruct(){
         ants[i].antX = rand() % 200;
         ants[i].antY = rand() % 200;
         selected_dirs[i] = rand() % 4;
-        syncAntBuffer(i);
 
 
     }
@@ -126,15 +97,10 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             
             nk_label(ctx, bufferY, NK_TEXT_LEFT);
             nk_label(ctx, butterDir, NK_TEXT_LEFT);
-            nk_edit_string(ctx, NK_EDIT_SIMPLE, ants[i].cAntX, &antlen[i][0], 4, nk_filter_decimal);
-            ants[i].antX = atoi(ants[i].cAntX);
-            if(ants[i].antX >= 200) ants[i].antX = 199;
-            if(ants[i].antX < 0) ants[i].antX = 0;
-            nk_edit_string(ctx, NK_EDIT_SIMPLE, ants[i].cAntY, &antlen[i][1], 4, nk_filter_decimal);
-            if(ants[i].antY >= 200) ants[i].antY = 199;
-            if(ants[i].antY < 0) ants[i].antY = 0;
+            ants[i].antX = nk_propertyi(ctx,"X",0,ants[i].antX,200,1,1);
+            ants[i].antY = nk_propertyi(ctx,"Y",0,ants[i].antY,200,1,1);
             nk_combobox(ctx, dir_pointers, 4, &selected_dirs[i], 25, nk_vec2(nk_widget_width(ctx), 200));
-            ants[i].antX =xt // todo finsih 
+
         }
 
 
@@ -218,15 +184,10 @@ int main(void) {
     }
 
     for (int i = 0; i < antcount; i++) {
-        ants[i].antX = atoi(ants[i].cAntX);
-        ants[i].antY = atoi(ants[i].cAntY);
         ants[i].antDir = (Direction)selected_dirs[i];
         ants[i].antDead = false;
     }
     for (int i = 0; i < colourCount; i++) {
-        Colours[i].r = atoi(Colours[i].cr);
-        Colours[i].g = atoi(Colours[i].cg);
-        Colours[i].b = atoi(Colours[i].cb);
         Colours[i].colourRule = (Rule)selected_rules[i];
     }
 
@@ -244,4 +205,4 @@ int main(void) {
 
     CloseWindow();
     return 0;
-}
+}  
