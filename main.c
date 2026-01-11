@@ -116,6 +116,7 @@ bool RunLauncherFrame(struct nk_context *ctx) {
     UpdateNuklear(ctx);
     float ratio_two[] = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
     if (nk_begin(ctx, "Settings", nk_rect(50, 50, 800, 800), NK_WINDOW_BORDER | NK_WINDOW_TITLE)) {
+        struct nk_rect bounds = nk_widget_bounds(ctx);
         nk_layout_row(ctx, NK_DYNAMIC, 30, 5, ratio_two);
         if (nk_button_label(ctx, "START SIM")) {
             startGame = true;
@@ -142,17 +143,23 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             setDefaultRules();
             startGame = true;
         }
+        if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds))
+            nk_tooltip(ctx, "Set symmetry rules");
         if(nk_button_label(ctx,"SYMMETRY")){
             setSymmetryRules();
             startGame = true;
         }
+
+
+
         if(nk_button_label(ctx,"RANDOM RULES")){
-            //todo, ask for seed
             setRandomRules();
             startGame = true;
         }
+       
         nk_layout_row_dynamic(ctx, 30, 3);
         for (int i = 0; i < antcount; i++) {
+            struct nk_rect bounds = nk_widget_bounds(ctx);
             char bufferX[25] = "";
             char bufferY[25] = "";
             char butterDir[25] = "";
@@ -169,23 +176,32 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             sprintf(y_id, "Y%d", i);
             ants[i].antX = nk_propertyi(ctx,x_id,0,ants[i].antX,199,1,1); //IMPORTANT TO SET FOR WEBSITE: ADD ID'S AND CHANGE MAX TO 199
             ants[i].antY = nk_propertyi(ctx,y_id,0,ants[i].antY,199,1,1);
-            nk_combobox(ctx, dir_pointers, 4, &selected_dirs[i], 25, nk_vec2(nk_widget_width(ctx), 200));
+
+
+
 
         }
 
 
         float widths[] = {130, 130, 130, 130, 80, 130}; 
-
         for (int i = 0; i < colourCount; i++) {
             nk_layout_row(ctx, NK_STATIC, 30, 6, widths);
 
             Colours[i].r = nk_propertyi(ctx, "#R", 0, Colours[i].r, 255, 1, 1);
             Colours[i].g = nk_propertyi(ctx, "#G", 0, Colours[i].g, 255, 1, 1);
             Colours[i].b = nk_propertyi(ctx, "#B", 0, Colours[i].b, 255, 1, 1);
-
+    
             nk_label(ctx, "RULE", NK_TEXT_CENTERED);
+            struct nk_rect bounds = nk_widget_bounds(ctx);
             nk_combobox(ctx, rule_pointers, 4, &selected_rules[i], 25, nk_vec2(nk_widget_width(ctx), 200));
-            nk_button_color(ctx, nk_rgb(Colours[i].r, Colours[i].g, Colours[i].b));
+            if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds)){ 
+                if(selected_rules[i] == 0) nk_tooltip(ctx, "  Turns ant 90 degrees Clockwise");
+                if(selected_rules[i] == 1) nk_tooltip(ctx, "  Turns ant 90 degrees anticlockwise");
+                if(selected_rules[i] == 3) nk_tooltip(ctx, "  Makes the ant go forwards");
+                if(selected_rules[i] == 2) nk_tooltip(ctx, "  Turns the ant 180 degrees");
+            }
+            nk_button_color(ctx, nk_rgb(Colours[i].r, Colours[i].g, Colours[i].b)); 
+
         }
     }
     nk_end(ctx);
