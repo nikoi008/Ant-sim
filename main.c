@@ -60,6 +60,57 @@ void InitAntStruct(){
 
     }
 }
+void setDefaultRules(){
+    antcount = 1;
+    ants[0].antX = 100;
+    ants[0].antY = 100;
+    selected_dirs[0] = rand() % 4;
+    Colours[0].r = 0;
+    Colours[0].g = 0;
+    Colours[0].b = 0;
+    colourCount = 2;
+    selected_rules[0] = R;
+    selected_rules[1] = L;
+    Colours[0].colourRule = R;
+    Colours[1].r = 255;
+    Colours[1].g = 255;
+    Colours[1].b = 255;
+    Colours[1].colourRule = L;
+}
+
+void setSymmetryRules(){
+    antcount = 4;
+    ants[0].antX = 107; ants[0].antY = 107; selected_dirs[0] = UP;
+    ants[1].antX = 107; ants[1].antY = 93; selected_dirs[1] = LEFT; 
+    ants[2].antX = 93; ants[2].antY = 93; selected_dirs[2] = DOWN;
+    ants[3].antX = 93; ants[3].antY = 107; selected_dirs[3] = RIGHT;
+    colourCount = 2;
+    Colours[0].r = rand() % 255;
+    Colours[0].g = rand() % 255;
+    Colours[0].b = rand() % 255;
+    selected_rules[0] = R;
+    selected_rules[1] = L;
+    Colours[0].colourRule = R;
+    Colours[1].r = rand() % 255;
+    Colours[1].g = rand() % 255;
+    Colours[1].b = rand() % 255;
+    Colours[1].colourRule = L;
+}  
+void setRandomRules(){
+    antcount = rand() % 8;
+    colourCount = rand() % 20;
+    for(int i = 0; i < antcount; i++){
+        ants[i].antX = rand() % 200;
+        ants[i].antY = rand() % 200;
+        selected_dirs[i] = rand() % 4;
+    }
+    for(int i = 0; i < colourCount; i++){
+            Colours[i].r = rand() % 255;
+            Colours[i].g = rand() % 255;
+            Colours[i].b = rand() % 255;
+            selected_rules[i] = rand() % 4;
+    }
+}
 bool RunLauncherFrame(struct nk_context *ctx) {
     bool startGame = false;
     UpdateNuklear(ctx);
@@ -85,9 +136,21 @@ bool RunLauncherFrame(struct nk_context *ctx) {
             colourCount--;
             if (colourCount < 2) colourCount = 2;
         }
-        //if(nk_button_label(ctx,"ORIGINAL RULES"))
-        //Add default, random, and maybe symmetry?
-
+        float ratio_three[] = {0.33333333333333f,0.33333333333333f,0.33333333333333f}; // just to be sure :)
+        nk_layout_row(ctx, NK_DYNAMIC, 30, 3, ratio_three);
+        if(nk_button_label(ctx,"DEFAULT RULES")){
+            setDefaultRules();
+            startGame = true;
+        }
+        if(nk_button_label(ctx,"SYMMETRY")){
+            setSymmetryRules();
+            startGame = true;
+        }
+        if(nk_button_label(ctx,"RANDOM RULES")){
+            //todo, ask for seed
+            setRandomRules();
+            startGame = true;
+        }
         nk_layout_row_dynamic(ctx, 30, 3);
         for (int i = 0; i < antcount; i++) {
             char bufferX[25] = "";
@@ -209,7 +272,6 @@ int main(void) {
     while (!WindowShouldClose()) {
         runSimFrame(canvas);
     }
-
     CloseWindow();
     return 0;
 }  
