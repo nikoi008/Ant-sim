@@ -93,8 +93,8 @@
     int selectedHexRules[20] = {0};
 void InitAntStruct(){
     for(int i = 0; i < 8; i++){
-        ants[i].antX = rand() % 200;
-        ants[i].antY = rand() % 200;
+        ants[i].antX = rand() % 400;
+        ants[i].antY = rand() % 400;
         selectedTileDirs[i] = rand() % 4;
         selectedHexDirs[i] = rand() % 6;
 
@@ -112,38 +112,85 @@ void InitColourStruct() {
 
     }
 }
+void setDefaultRulesT(){
+    antcount = 1;
+    colourCount = 2;
+    Colours[0].r = 255; Colours[0].g = 255; Colours[0].b = 255;
+    Colours[1].r = 0; Colours[1].g = 0; Colours[1].b = 0;
+    ants[0].antX = 200; ants[0].antY = 200 ;
+    selectedTileDirs[0] = rand() % 4;
+    selectedTileRules[0] = R; selectedTileRules[1] = L;
 
-    //TODO READD PRESETS
-    bool startGame;
+}
 
-    void drawHexSpecificLauncher(struct nk_context *ctx){
-        //todo add hex presets
+void setSymmetryRulesT(){
+    antcount = 4;
+    ants[0].antX = 207; ants[0].antY = 207 ;
+    ants[1].antX = 207; ants[1].antY = 193 ;
+    ants[2].antX = 193; ants[2].antY = 193 ;
+    ants[3].antX = 193; ants[3].antY = 207 ;
+
+    for(int i = 0; i < 2; i++){
+        Colours[i].r = rand() % 255;
+        Colours[i].g = rand() % 255;
+        Colours[i].b = rand() % 255;
     }
-    void drawTileSpecificLauncher(struct nk_context *ctx){
-            float ratio_three[] = {0.33333333333333,0.3333333333,0.333333333}; 
-            nk_layout_row(ctx, NK_DYNAMIC, 30, 3, ratio_three);
-            struct nk_rect bounds = nk_widget_bounds(ctx);
-            if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds)){ 
-                nk_tooltip(ctx, "  Classic rules of Langtons ant: 1 ant and 2 colours with rules R L");
-                }
-            if(nk_button_label(ctx,"DEFAULT RULES")){
-            // setDefaultRules();
-                startGame = true;
-            }
-            struct nk_rect bounds2 = nk_widget_bounds(ctx);
-            if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds2)){ 
-                    nk_tooltip(ctx, "  Infinitely looping symmetrical pattern. 4 ants and 2 colours of rules R L");
-                }
-            if(nk_button_label(ctx,"SYMMETRY")){
-                //setSymmetryRules();
-                startGame = true;
-            }
-            struct nk_rect bounds3 = nk_widget_bounds(ctx);
-            if(nk_button_label(ctx,"RANDOM RULES")){
-            // setRandomRules();
-                startGame = true;
-            }
+    selectedTileRules[0] = R; selectedTileRules[1] = L;
+    selectedTileDirs[0] = UP;
+    selectedTileDirs[1] =  LEFT;
+    selectedTileDirs[2] =  DOWN;
+    selectedTileDirs[3] =  RIGHT;
+
+}
+void setHighwayRulesH(){
+    antcount = 1;
+    colourCount = 8;
+    selectedHexDirs[0] = rand() % 6;
+    ants[0].antX = 200;
+    ants[0].antY = 200;
+    for(int i = 0; i < 8; i++){
+        Colours[i].r = rand() % 255;
+        Colours[i].g = rand() % 255;
+        Colours[i].b = rand() % 255;
     }
+    selectedHexRules[0] = L2;
+    selectedHexRules[1] = UR;
+    selectedHexRules[2] = R1;
+    selectedHexRules[3] = L2;
+    selectedHexRules[4] = UR;
+    selectedHexRules[5] = R1;
+    selectedHexRules[6] = R2;
+    selectedHexRules[7] = R2;
+}
+void setSpiralRulesH(){
+    antcount = 1;
+    colourCount = 7;
+    for(int i = 0; i < 7; i++){
+        Colours[i].r = rand() % 255;
+        Colours[i].g = rand() % 255;
+        Colours[i].b = rand() % 255;
+    }
+    selectedHexDirs[0] = rand() % 6;
+    ants[0].antX = 200;
+    ants[0].antY = 200;
+    selectedHexRules[0] = L1;
+    selectedHexRules[1] = L2;
+    selectedHexRules[2] = NR;
+    selectedHexRules[3] = UR;
+    selectedHexRules[4] = L2;
+    selectedHexRules[5] = L1;
+    selectedHexRules[6] = R2;
+
+
+
+}
+void setRandomRulesTandH(){
+    InitAntStruct();
+    InitColourStruct();
+    antcount = rand() % 8;
+    colourCount = rand() % 20;
+}
+
     static int int_slider = 0;
     bool RunLauncherFrame(struct nk_context *ctx) {
         bool startGame = false;
@@ -171,13 +218,78 @@ void InitColourStruct() {
                 if (colourCount < 2) colourCount = 2;
             }
             float width[] = {200,300,300};
-            nk_layout_row(ctx, NK_STATIC, 30, 2, width);
-            nk_label(ctx,"SIMULATION SPEED",NK_TEXT_CENTERED); //common
+            nk_layout_row(ctx, NK_STATIC, 30, 3, width);
+            nk_label(ctx,"SIMULATION SPEED",NK_TEXT_CENTERED); 
             nk_slider_int(ctx, 1, &int_slider, 10, 1); 
-            if(nk_button_label(ctx,"MODE")){
+             struct nk_rect modeBounds = nk_widget_bounds(ctx);
+            if (nk_input_is_mouse_hovering_rect(&ctx->input, modeBounds)){ 
+                    char mode[12] = "";
+                    if(CurrentMode == MODE_TILE) 
+                        strcpy(mode, "Tile");
+                    else 
+                        strcpy(mode, "Hexagon");
+                    char buffer[50] = "";
+                    snprintf(buffer,sizeof(buffer),"Current Mode: %s",mode);
+                    nk_tooltip(ctx, buffer);
+                    }
+            if(nk_button_label(ctx,"MODE")){ 
                 CurrentMode ++;
                 CurrentMode = CurrentMode % 2;
-            }      
+            }  
+
+            if(CurrentMode == MODE_TILE){
+                float ratio_three[] = {0.33333333333333,0.3333333333,0.333333333}; 
+                nk_layout_row(ctx, NK_DYNAMIC, 30, 3, ratio_three);
+                struct nk_rect bounds = nk_widget_bounds(ctx);
+                if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds)){ 
+                    nk_tooltip(ctx, "  Classic rules of Langtons ant: 1 ant and 2 colours with rules R L");
+                    }
+                if(nk_button_label(ctx,"DEFAULT RULES")){
+                    printf("hello");
+                    setDefaultRulesT();
+                    startGame = true;
+                }
+                struct nk_rect bounds2 = nk_widget_bounds(ctx);
+                if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds2)){ 
+                        nk_tooltip(ctx, "  Infinitely looping symmetrical pattern. 4 ants and 2 colours of rules R L");
+                    }
+                if(nk_button_label(ctx,"SYMMETRY")){
+                    setSymmetryRulesT();
+                    startGame = true;
+                }
+                struct nk_rect bounds3 = nk_widget_bounds(ctx);
+                if(nk_button_label(ctx,"RANDOM RULES")){
+                    setRandomRulesTandH();
+                    startGame = true;
+                }
+                }
+            else{
+                float ratio_three[] = {0.33333333333333,0.3333333333,0.333333333}; 
+                nk_layout_row(ctx, NK_DYNAMIC, 30, 3, ratio_three);
+                struct nk_rect bounds = nk_widget_bounds(ctx);
+                if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds)){ 
+                    nk_tooltip(ctx, "  Hexagonal highway");
+                    }
+                if(nk_button_label(ctx,"Symmetry")){
+                
+                    setHighwayRulesH();
+                    startGame = true;
+                }
+                struct nk_rect bounds2 = nk_widget_bounds(ctx);
+                if (nk_input_is_mouse_hovering_rect(&ctx->input, bounds2)){ 
+                        nk_tooltip(ctx, "  Spiral growth that stretches infinitely until the ant dies");
+                    }
+                if(nk_button_label(ctx,"SPIRAL")){
+                   setSpiralRulesH();
+                    startGame = true;
+                }
+                struct nk_rect bounds3 = nk_widget_bounds(ctx);
+                if(nk_button_label(ctx,"RANDOM RULES")){
+                   setRandomRulesTandH();
+                    startGame = true;
+                }
+            }
+
             nk_layout_row_dynamic(ctx, 30, 3);
             for (int i = 0; i < antcount; i++) {
                 struct nk_rect bounds = nk_widget_bounds(ctx);
@@ -195,8 +307,8 @@ void InitColourStruct() {
                 char x_id[32], y_id[32];
                 sprintf(x_id, "X%d", i);
                 sprintf(y_id, "Y%d", i);
-                ants[i].antX = nk_propertyi(ctx,x_id,0,ants[i].antX,199,1,1); //IMPORTANT TO SET FOR WEBSITE: ADD ID'S AND CHANGE MAX TO 199
-                ants[i].antY = nk_propertyi(ctx,y_id,0,ants[i].antY,199,1,1);
+                ants[i].antX = nk_propertyi(ctx,x_id,0,ants[i].antX,399,1,1); 
+                ants[i].antY = nk_propertyi(ctx,y_id,0,ants[i].antY,399,1,1);
                 if(CurrentMode == MODE_TILE) nk_combobox(ctx, tileDirPointers, 4, &selectedTileDirs[i], 25, nk_vec2(nk_widget_width(ctx), 200));
                 else nk_combobox(ctx, hexDirPointers, 4, &selectedHexDirs[i], 25, nk_vec2(nk_widget_width(ctx), 200));
                 
@@ -224,7 +336,6 @@ void InitColourStruct() {
                 nk_button_color(ctx, nk_rgb(Colours[i].r, Colours[i].g, Colours[i].b)); 
                 }else{
                     nk_combobox(ctx, hexRulePointers, 6, &selectedHexRules[i], 25, nk_vec2(nk_widget_width(ctx), 200));
-                    //TODO ADD HOBVERING
                     nk_button_color(ctx, nk_rgb(Colours[i].r, Colours[i].g, Colours[i].b)); 
                 }
 
@@ -238,7 +349,7 @@ void InitColourStruct() {
 
         return startGame;
     }
-    void runHexSim() {
+void runHexSim() {
     float radius = 5.0f;
     float height = sqrtf(3.0f) * radius;
 
@@ -307,7 +418,7 @@ void InitColourStruct() {
             int y = ants[i].antY;
             
 
-            if (x < 0 || x >= 200 || y < 0 || y >= 200) {
+            if (x < 0 || x >= 400 || y < 0 || y >= 400) {
                 ants[i].antDead = true;
                 continue;
             }
@@ -340,7 +451,7 @@ void InitColourStruct() {
             int y = ants[i].antY;
             
 
-            if (x < 0 || x >= 200 || y < 0 || y >= 200) {
+            if (x < 0 || x >= 400 || y < 0 || y >= 400) {
                 ants[i].antDead = true;
                 continue;
             }
@@ -355,7 +466,9 @@ void InitColourStruct() {
 
     typedef enum{
         INITIALISING,
+        
         LAUNCHER,
+        LIMBO,
         INITSIM,
         SIM,
         PAUSED
@@ -366,14 +479,14 @@ void InitColourStruct() {
     int zoomMode = 0;
 
     void zoomyCameraStuff(){
-            /*
+            
     
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
                 Vector2 delta = GetMouseDelta();
                 delta = Vector2Scale(delta, -1.0f/camera.zoom);
                 camera.target = Vector2Add(camera.target, delta);
-            } *///curently commented out because its buggy and i dont know how to fix it :)
+            }
 
             if (zoomMode == 0)
             {
@@ -386,7 +499,7 @@ void InitColourStruct() {
                     camera.target = mouseWorldPos;
 
                     float scale = 0.2f*wheel;
-                    camera.zoom = Clamp(expf(logf(camera.zoom)+scale), 0.5f, 64.0f);
+                    camera.zoom = Clamp(expf(logf(camera.zoom)+scale), 0.1f, 64.0f);
                     
                 }
             }
@@ -394,7 +507,7 @@ void InitColourStruct() {
 
 
     int main(void) {
-
+            
             srand(time(NULL));
             memset(grid, 0, sizeof(grid));
             InitColourStruct();
@@ -405,23 +518,30 @@ void InitColourStruct() {
             Font font = LoadFontFromNuklear(fontSize);
             struct nk_context *ctx = InitNuklearEx(font, fontSize);
             state = LAUNCHER;
-            RenderTexture2D canvas = LoadRenderTexture(2000, 2000);
+            RenderTexture2D canvas = LoadRenderTexture(4000, 4000);
             camera.target = (Vector2){ 500.0f, 500.0f };
             camera.offset = (Vector2){ 500.0f, 500.0f };
             camera.rotation = 0.0f;
             camera.zoom = 1.0f;
-            while(!WindowShouldClose()){
+            
+            
+    while(!WindowShouldClose()){
+        if(IsKeyPressed(KEY_R) && state == SIM){
+            nk_end(ctx);
+            InitColourStruct();
+            InitAntStruct();
+            state = LAUNCHER;
+        }
         BeginDrawing();
         if (state == SIM) zoomyCameraStuff();
         switch(state){
 
         case(LAUNCHER):
+            if (RunLauncherFrame(ctx)) {
+                state = INITSIM;
 
-        if (RunLauncherFrame(ctx)) {
-            state = INITSIM;
-
-        }
-        break;
+            }
+            break;
         
         case(INITSIM):
             memset(grid, 0, sizeof(grid));
@@ -435,7 +555,7 @@ void InitColourStruct() {
                 Colours[i].colourRuleTile = (TileRules)selectedTileRules[i];
             }
 
-            UnloadNuklear(ctx);
+            //UnloadNuklear(ctx);
             int fps = int_slider * int_slider * 50;
             if (fps > 3000) fps = 3000;
                 SetTargetFPS(fps);
@@ -444,6 +564,9 @@ void InitColourStruct() {
             EndTextureMode();
             state = SIM;
             break;
+        case(LIMBO):
+            ClearBackground(RAYWHITE);
+
         case(SIM):
         BeginTextureMode(canvas);
         for(int i = 0; i < 10 * int_slider; i++){
@@ -454,7 +577,9 @@ void InitColourStruct() {
             }
         }
         EndTextureMode();
+            ClearBackground(RAYWHITE);
             BeginMode2D(camera);
+            
             DrawTextureRec(canvas.texture, (Rectangle){ 0, 0, (float)canvas.texture.width, (float)-canvas.texture.height }, (Vector2){ 0, 0 }, WHITE);
             EndMode2D();
             break;
